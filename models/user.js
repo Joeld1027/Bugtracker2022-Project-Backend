@@ -1,38 +1,52 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
+const passportLocalMongoose = require("passport-local-mongoose");
+
+const Session = new mongoose.Schema({
+	refreshToken: {
+		type: String,
+		default: "",
+	},
+});
 
 const userSchema = new mongoose.Schema({
 	name: {
 		type: String,
-		required: true,
-	},
-	email: {
-		type: String,
-		required: true,
-		unique: true,
-	},
-	password: {
-		type: String,
-		required: true,
+		default: "",
 	},
 	role: {
 		type: String,
-		default: 'Demo-Submitter',
+		default: "Demo-Submitter",
 	},
 	userSince: {
 		type: Date,
 		default: Date.now,
 	},
-	assignedTasks: [
-		{ type: mongoose.Schema.Types.ObjectId, ref: 'Task' },
-	],
+	assignedTasks: [{ type: mongoose.Schema.Types.ObjectId, ref: "Task" }],
 	assignedProjects: [
 		{
 			type: mongoose.Schema.Types.ObjectId,
-			ref: 'Projects',
+			ref: "Projects",
 		},
 	],
+	refreshToken: {
+		type: [Session],
+	},
+	authStrategy: {
+		type: String,
+		default: "local",
+	},
 });
 
-const User = mongoose.model('User', userSchema);
+//Remove refreshToken from the response
+userSchema.set("toJSON", {
+	transform: function (doc, ret, options) {
+		delete ret.refreshToken;
+		return ret;
+	},
+});
+
+userSchema.plugin(passportLocalMongoose);
+
+const User = mongoose.model("User", userSchema);
 
 module.exports = User;
