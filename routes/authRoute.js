@@ -8,10 +8,10 @@ const {
 	getToken,
 	COOKIE_OPTIONS,
 	getRefreshToken,
+	verifyUser,
 } = require("../authenticate");
 
 router.post("/signup", (req, res, next) => {
-	console.log(req.body);
 	// Verify that first name is not empty
 	if (!req.body.firstName) {
 		res.statusCode = 500;
@@ -48,7 +48,6 @@ router.post("/signup", (req, res, next) => {
 });
 
 router.post("/login", passport.authenticate("local"), (req, res, next) => {
-	console.log(req.user);
 	const token = getToken({ _id: req.user._id });
 	const refreshToken = getRefreshToken({ _id: req.user._id });
 	User.findById(req.user._id).then(
@@ -60,12 +59,43 @@ router.post("/login", passport.authenticate("local"), (req, res, next) => {
 					res.send(err);
 				} else {
 					res.cookie("refreshToken", refreshToken, COOKIE_OPTIONS);
-					res.send({ success: true, token });
+					res.send({ success: true, token, user });
 				}
 			});
 		},
 		(err) => next(err)
 	);
+});
+
+router.get("/logout", verifyUser, (req, res, next) => {
+	const { signedCookies = {} } = req;
+	const { refreshToken } = signedCookies;
+	User.findById(req.user._id).then(
+		(user) => {
+			const tokenIndex = user.refreshToken.findIndex(
+				(item) => item.refreshToken === refreshToken
+			);
+
+			if (tokenIndex !== -1) {
+				user.refreshToken.id(user.refreshToken[tokenIndex]._id).remove();
+			}
+
+			user.save((err, user) => {
+				if (err) {
+					res.statusCode = 500;
+					res.send(err);
+				} else {
+					res.clearCookie("refreshToken", COOKIE_OPTIONS);
+					res.send({ success: true });
+				}
+			});
+		},
+		(err) => next(err)
+	);
+});
+
+router.get("/currentUser", verifyUser, (req, res, next) => {
+	res.send(req.user);
 });
 
 router.post("/refreshToken", (req, res, next) => {

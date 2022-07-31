@@ -1,34 +1,23 @@
 const express = require("express");
 const router = express.Router();
 const User = require("../models/user");
-const passport = require("passport");
-const jwt = require("jsonwebtoken");
 
-const {
-	getToken,
-	COOKIE_OPTIONS,
-	getRefreshToken,
-	verifyUser,
-} = require("../authenticate");
-
-router.get("/currentUser", verifyUser, (req, res, next) => {
-	res.send(req.user);
-});
+const { verifyUser } = require("../authenticate");
 
 //Get all users
-// router.get('/', async (req, res, next) => {
-// 	try {
-// 		const allUsers = await User.find({}).select('-password');
-// 		if (allUsers) {
-// 			return res.status(200).json(allUsers);
-// 		}
-// 		next();
-// 	} catch (err) {
-// 		return next({
-// 			message: err.message,
-// 		});
-// 	}
-// });
+router.get("/", async (req, res, next) => {
+	try {
+		const allUsers = await User.find({});
+		if (allUsers) {
+			return res.status(200).json(allUsers);
+		}
+		next();
+	} catch (err) {
+		return next({
+			message: err.message,
+		});
+	}
+});
 
 // router.get('/:userId', async (req, res, next) => {
 // 	try {
