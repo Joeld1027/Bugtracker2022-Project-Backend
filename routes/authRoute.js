@@ -12,39 +12,30 @@ const {
 } = require("../authenticate");
 
 router.post("/signup", (req, res, next) => {
-	// Verify that first name is not empty
-	if (!req.body.firstName) {
-		res.statusCode = 500;
-		res.send({
-			name: "FirstNameError",
-			message: "The first and last name is required",
-		});
-	} else {
-		User.register(
-			new User({ username: req.body.email }),
-			req.body.password,
-			(err, user) => {
-				if (err) {
-					res.statusCode = 500;
-					res.send(err);
-				} else {
-					user.name = `${req.body.firstName} ${req.body.lastName}`;
-					const token = getToken({ _id: user._id });
-					const refreshToken = getRefreshToken({ _id: user._id });
-					user.refreshToken.push({ refreshToken });
-					user.save((err, user) => {
-						if (err) {
-							res.statusCode = 500;
-							res.send(err);
-						} else {
-							res.cookie("refreshToken", refreshToken, COOKIE_OPTIONS);
-							res.send({ success: true, token });
-						}
-					});
-				}
+	User.register(
+		new User({ username: req.body.username }),
+		req.body.password,
+		(err, user) => {
+			if (err) {
+				res.statusCode = 500;
+				res.send(err);
+			} else {
+				user.name = `${req.body.firstName} ${req.body.lastName}`;
+				const token = getToken({ _id: user._id });
+				const refreshToken = getRefreshToken({ _id: user._id });
+				user.refreshToken.push({ refreshToken });
+				user.save((err, user) => {
+					if (err) {
+						res.statusCode = 500;
+						res.send(err);
+					} else {
+						res.cookie("refreshToken", refreshToken, COOKIE_OPTIONS);
+						res.send({ success: true, token, user });
+					}
+				});
 			}
-		);
-	}
+		}
+	);
 });
 
 router.post("/login", passport.authenticate("local"), (req, res, next) => {

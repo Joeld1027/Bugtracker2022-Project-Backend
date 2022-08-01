@@ -25,13 +25,7 @@ app.use(
 		saveUninitialized: true,
 	})
 );
-// parse requests of content-type - application/json
-// app.use(express.json());
-
-// // parse requests of content-type - application/x-www-form-urlencoded
-// app.use(express.urlencoded({ extended: true }));
 app.use(bodyParser.json());
-
 app.use(cookieParser(process.env.COOKIE_SECRET));
 
 //Add the client URL to the CORS policy

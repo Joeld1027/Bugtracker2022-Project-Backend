@@ -15,11 +15,7 @@ const userSchema = new mongoose.Schema({
 	},
 	role: {
 		type: String,
-		default: "Demo-Submitter",
-	},
-	userSince: {
-		type: Date,
-		default: Date.now,
+		default: "Demo-Developer",
 	},
 	assignedTasks: [{ type: mongoose.Schema.Types.ObjectId, ref: "Task" }],
 	assignedProjects: [
