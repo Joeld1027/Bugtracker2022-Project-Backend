@@ -20,8 +20,9 @@ const authRouter = require("./routes/authRoute");
 const app = express();
 app.use(
 	session({
-		secret: process.env.EXPRESS_SESSION_SECRET,
+		secret: process.env.COOKIE_SECRET,
 		resave: false,
+		cookie: { maxAge: 7 * 60 * 1000 },
 		saveUninitialized: true,
 	})
 );
@@ -58,7 +59,7 @@ app.get("/", function (req, res) {
 
 //Start the server in port 8081
 
-const server = app.listen(process.env.PORT || 8082, function () {
+const server = app.listen(process.env.PORT || 8081, function () {
 	const port = server.address().port;
 
 	console.log("App started at port:", port);
