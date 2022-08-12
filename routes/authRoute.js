@@ -54,7 +54,6 @@ router.get("/logout", verifyUser, (req, res, next) => {
 					res.statusCode = 500;
 					res.send(err);
 				} else {
-					res.clearCookie("refreshToken", COOKIE_OPTIONS);
 					res.send({ success: true });
 				}
 			});

@@ -1,13 +1,15 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const { Project, User, Task } = require('../models');
+const Task = require("../models/task");
+const Project = require("../models/project");
+const User = require("../models/user");
 
 // find all projects
-router.get('/', async (req, res, next) => {
+router.get("/", async (req, res, next) => {
 	try {
 		const foundProjects = await Project.find()
-			.populate('projectTasks')
-			.populate('assignedDevs', '-__v -password')
+			.populate("projectTasks")
+			.populate("assignedDevs")
 			.exec();
 		if (foundProjects) {
 			return res.status(200).json(foundProjects);
@@ -21,7 +23,7 @@ router.get('/', async (req, res, next) => {
 });
 
 //create new project
-router.post('/', async (req, res, next) => {
+router.post("/", async (req, res, next) => {
 	try {
 		const newProject = new Project({
 			name: req.body.name,
@@ -47,7 +49,7 @@ router.post('/', async (req, res, next) => {
 					const task = await Task.findById(taskId[i]);
 					await newProject.projectTasks.push(task._id);
 					await task.assignedProject.push(newProject._id);
-					task.set({ status: 'Pending' });
+					task.set({ status: "Pending" });
 					await task.save();
 					await newProject.save();
 				}
@@ -67,17 +69,13 @@ router.post('/', async (req, res, next) => {
 });
 
 // read - update - delete individual projects
-router.get('/:projectId', async (req, res, next) => {
+router.get("/:projectId", async (req, res, next) => {
 	try {
 		const foundProject = await Project.findById(req.params.projectId);
 		if (foundProject) {
-			let foundWithUsers = await foundProject
-				.populate('asignedDevs', ['firstName', 'lastName', 'role'])
-				.populate('projectTickets')
-				.execPopulate();
-
 			return res.status(200).json(foundProject);
 		}
+		res.status(404).json({ message: "Project not found." });
 		next();
 	} catch (err) {
 		res.status(500).json({
@@ -86,8 +84,7 @@ router.get('/:projectId', async (req, res, next) => {
 	}
 });
 
-router.patch('/:projectId', async (req, res, next) => {
-	console.log(req.body);
+router.patch("/:projectId", async (req, res, next) => {
 	try {
 		const updatedProject = await Project.findByIdAndUpdate(
 			req.params.projectId,
@@ -104,7 +101,7 @@ router.patch('/:projectId', async (req, res, next) => {
 				await task.update({
 					$pull: { assignedProject: updatedProject._id },
 				});
-				await task.update({ $set: { status: 'New' } });
+				await task.update({ $set: { status: "New" } });
 				await task.save();
 			}
 		}
@@ -136,7 +133,7 @@ router.patch('/:projectId', async (req, res, next) => {
 				const task = await Task.findById(addTasks[i]);
 				await updatedProject.projectTasks.push(task._id);
 				await task.assignedProject.push(updatedProject._id);
-				task.set({ status: 'Pending' });
+				task.set({ status: "Pending" });
 				await task.save();
 			}
 		}
@@ -149,13 +146,11 @@ router.patch('/:projectId', async (req, res, next) => {
 	}
 });
 
-router.delete('/:projectId', async (req, res, next) => {
+router.delete("/:projectId", async (req, res, next) => {
 	try {
-		const deletedProject = await Project.findById(
-			req.params.projectId
-		);
+		const deletedProject = await Project.findById(req.params.projectId);
 
-		if (deletedProject.projectTickets) {
+		if (deletedProject.projectTasks) {
 			const tasks = deletedProject.projectTasks;
 			for (i = 0; i < tasks.length; i++) {
 				const task = await Task.findById(tasks[i]);

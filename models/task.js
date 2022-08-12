@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const taskSchema = new mongoose.Schema({
 	name: String,
@@ -7,7 +7,7 @@ const taskSchema = new mongoose.Schema({
 	assignedDevs: [
 		{
 			type: mongoose.Schema.Types.ObjectId,
-			ref: 'User',
+			ref: "User",
 		},
 	],
 	createdDate: {
@@ -18,26 +18,22 @@ const taskSchema = new mongoose.Schema({
 	priority: String,
 	status: {
 		type: String,
-		default: 'New',
+		default: "New",
 	},
 	assignedProject: [
 		{
 			type: mongoose.Schema.Types.ObjectId,
-			ref: 'Projects',
+			ref: "Projects",
 		},
 	],
 	comments: [
 		{
 			type: mongoose.Schema.Types.ObjectId,
-			ref: 'Comment',
+			ref: "Comment",
 		},
 	],
-	history: {
-		updatedBy: String,
-		updateInfo: String,
-	},
 });
 
-const Task = mongoose.model('Task', taskSchema);
+const Task = mongoose.model("Task", taskSchema);
 
 module.exports = Task;

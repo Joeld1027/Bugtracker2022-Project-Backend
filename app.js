@@ -16,6 +16,9 @@ require("./strategies/LocalStrategy");
 require("./authenticate");
 
 const authRouter = require("./routes/authRoute");
+const userRouter = require("./routes/userRoute");
+const taskRouter = require("./routes/taskRoute");
+const projectRouter = require("./routes/projectRoute");
 
 const app = express();
 app.use(
@@ -52,6 +55,9 @@ app.use(cors(corsOptions));
 app.use(passport.initialize());
 
 app.use("/auth", authRouter);
+app.use("/user", userRouter);
+app.use("/tasks", taskRouter);
+app.use("/projects", projectRouter);
 
 app.get("/", function (req, res) {
 	res.send({ status: "success" });
