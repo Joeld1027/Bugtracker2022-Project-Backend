@@ -53,6 +53,7 @@ const corsOptions = {
 app.use(cors(corsOptions));
 
 app.use(passport.initialize());
+app.use(passport.session());
 
 app.use("/auth", authRouter);
 app.use("/user", userRouter);

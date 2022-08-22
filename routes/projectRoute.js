@@ -29,7 +29,7 @@ router.post("/", async (req, res, next) => {
 			name: req.body.name,
 			description: req.body.description,
 			priority: req.body.priority,
-			deadline: req.body.deadline,
+			deadline: req.body.dueDate,
 			createdBy: req.body.createdBy,
 		});
 
@@ -42,17 +42,16 @@ router.post("/", async (req, res, next) => {
 				await user.save();
 				await newProject.save();
 			}
-
-			if (req.body.addTasks) {
-				const taskId = req.body.addTasks;
-				for (i = 0; i < taskId.length; i++) {
-					const task = await Task.findById(taskId[i]);
-					await newProject.projectTasks.push(task._id);
-					await task.assignedProject.push(newProject._id);
-					task.set({ status: "Pending" });
-					await task.save();
-					await newProject.save();
-				}
+		}
+		if (req.body.addTasks) {
+			const taskId = req.body.addTasks;
+			for (i = 0; i < taskId.length; i++) {
+				const task = await Task.findById(taskId[i]);
+				await newProject.projectTasks.push(task._id);
+				await task.assignedProject.push(newProject._id);
+				task.set({ status: "Pending" });
+				await task.save();
+				await newProject.save();
 			}
 		}
 		await newProject.save();

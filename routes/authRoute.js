@@ -3,7 +3,7 @@ const router = express.Router();
 const User = require("../models/user");
 const passport = require("passport");
 
-const { getToken, COOKIE_OPTIONS, verifyUser } = require("../authenticate");
+const { getToken, verifyUser } = require("../authenticate");
 
 router.post("/signup", (req, res, next) => {
 	User.register(
@@ -46,7 +46,7 @@ router.post("/login", passport.authenticate("local"), (req, res, next) => {
 	);
 });
 
-router.get("/logout", verifyUser, (req, res, next) => {
+router.post("/logout", verifyUser, (req, res, next) => {
 	User.findById(req.user._id).then(
 		(user) => {
 			user.save((err, user) => {
@@ -54,6 +54,7 @@ router.get("/logout", verifyUser, (req, res, next) => {
 					res.statusCode = 500;
 					res.send(err);
 				} else {
+					req.logout((err) => next(err));
 					res.send({ success: true });
 				}
 			});
@@ -63,6 +64,7 @@ router.get("/logout", verifyUser, (req, res, next) => {
 });
 
 router.get("/currentUser", verifyUser, (req, res, next) => {
+	if (!req.user) return next(err);
 	res.send(req.user);
 });
 
