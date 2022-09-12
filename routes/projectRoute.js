@@ -3,6 +3,7 @@ const router = express.Router();
 const Task = require("../models/task");
 const Project = require("../models/project");
 const User = require("../models/user");
+const { verifyUser } = require("../authenticate");
 
 // find all projects
 router.get("/", async (req, res, next) => {
@@ -23,14 +24,14 @@ router.get("/", async (req, res, next) => {
 });
 
 //create new project
-router.post("/", async (req, res, next) => {
+router.post("/", verifyUser, async (req, res, next) => {
 	try {
 		const newProject = new Project({
 			name: req.body.name,
 			description: req.body.description,
 			priority: req.body.priority,
-			deadline: req.body.dueDate,
-			createdBy: req.body.createdBy,
+			deadline: req.body.deadline,
+			createdBy: req.user.name,
 		});
 
 		if (req.body.addDevelopers) {
@@ -90,8 +91,8 @@ router.patch("/:projectId", async (req, res, next) => {
 			req.body,
 			{ new: true, omitUndefined: true }
 		);
-		if (req.body.tasks) {
-			const tasksToRemove = req.body.tasks;
+		if (req.body.tasksToRemove) {
+			const { tasksToRemove } = req.body;
 			for (i = 0; i < tasksToRemove.length; i++) {
 				const task = await Task.findById(tasksToRemove[i]);
 				await updatedProject.update({
@@ -145,7 +146,7 @@ router.patch("/:projectId", async (req, res, next) => {
 	}
 });
 
-router.delete("/:projectId", async (req, res, next) => {
+router.delete("/:projectId", verifyUser, async (req, res, next) => {
 	try {
 		const deletedProject = await Project.findById(req.params.projectId);
 

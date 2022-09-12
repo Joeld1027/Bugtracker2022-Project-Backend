@@ -17,7 +17,10 @@ const userSchema = new mongoose.Schema({
 			ref: "Projects",
 		},
 	],
-
+	userSince: {
+		type: Date,
+		default: Date.now,
+	},
 	authStrategy: {
 		type: String,
 		default: "local",

@@ -54,7 +54,6 @@ router.post("/logout", verifyUser, (req, res, next) => {
 					res.statusCode = 500;
 					res.send(err);
 				} else {
-					req.logout((err) => next(err));
 					res.send({ success: true });
 				}
 			});
@@ -63,9 +62,13 @@ router.post("/logout", verifyUser, (req, res, next) => {
 	);
 });
 
-router.get("/currentUser", verifyUser, (req, res, next) => {
+router.get("/currentUser", verifyUser, async (req, res, next) => {
 	if (!req.user) return next(err);
-	res.send(req.user);
+	const foundUser = await User.findById(req.user._id)
+		.populate("assignedProjects")
+		.exec();
+	console.log(foundUser);
+	if (foundUser) res.send(foundUser);
 });
 
 module.exports = router;

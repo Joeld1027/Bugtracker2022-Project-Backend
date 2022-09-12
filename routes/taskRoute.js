@@ -7,11 +7,10 @@ const User = require("../models/user");
 // get all the tasks
 router.get("/", async (req, res, next) => {
 	try {
-		const foundTasks = await Task.find();
-		// .populate("assignedProject")
-		// .populate("comments")
-		// .populate("assignedDevs")
-		// .exec();
+		const foundTasks = await Task.find()
+			.populate("assignedProject")
+			.populate("assignedDevs")
+			.exec();
 
 		if (foundTasks) {
 			return res.status(200).json(foundTasks);
