@@ -29,37 +29,40 @@ router.post("/signup", (req, res, next) => {
 	);
 });
 
-router.post("/login", passport.authenticate("local"), (req, res, next) => {
-	const token = getToken({ _id: req.user._id });
-	User.findById(req.user._id).then(
-		(user) => {
-			user.save((err, user) => {
-				if (err) {
-					res.statusCode = 500;
-					res.send(err);
-				} else {
-					res.send({ success: true, token, user });
-				}
-			});
-		},
-		(err) => next(err)
-	);
-});
+router.post(
+	"/login",
+	passport.authenticate("local"),
+	async (req, res, next) => {
+		try {
+			const token = getToken({ _id: req.user._id });
+
+			const foundUser = await User.findById(req.user._id)
+				.populate("assignedProjects")
+				.exec();
+
+			res.send({ success: true, token, foundUser });
+		} catch (error) {
+			res.statusCode = 500;
+			console.log(error);
+			res.send(error);
+		}
+		next();
+	}
+);
 
 router.post("/logout", verifyUser, (req, res, next) => {
-	User.findById(req.user._id).then(
-		(user) => {
-			user.save((err, user) => {
-				if (err) {
-					res.statusCode = 500;
-					res.send(err);
-				} else {
-					res.send({ success: true });
-				}
-			});
-		},
-		(err) => next(err)
-	);
+	req.logout;
+	if (req.session) {
+		req.session.destroy((err) => {
+			if (err) {
+				res.status(400).send("Unable to log out");
+			} else {
+				res.send("Logout successful");
+			}
+		});
+	} else {
+		res.end();
+	}
 });
 
 router.get("/currentUser", verifyUser, async (req, res, next) => {
@@ -67,7 +70,6 @@ router.get("/currentUser", verifyUser, async (req, res, next) => {
 	const foundUser = await User.findById(req.user._id)
 		.populate("assignedProjects")
 		.exec();
-	console.log(foundUser);
 	if (foundUser) res.send(foundUser);
 });
 

@@ -81,8 +81,8 @@ router.patch("/:taskId", async (req, res, next) => {
 			}
 		}
 
-		if (req.body.assignedUserToTask) {
-			const user = await User.findById(req.body.assignedUserToTask);
+		if (req.body.assignUserToTask && updatedTask.assignedDevs.length === 0) {
+			const user = await User.findById(req.body.assignUserToTask);
 			await updatedTask.assignedDevs.push(user._id);
 			await user.assignedTasks.push(updatedTask._id);
 			await user.save();
